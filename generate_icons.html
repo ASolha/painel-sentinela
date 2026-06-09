@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Gerar Ícones — Painel Sentinela</title>
+  <style>
+    body { background:#070007; color:#e6edf3; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:48px 24px; gap:32px; }
+    h1 { font-size:20px; margin:0; color:#ff8844; }
+    p  { color:#7d8590; font-size:14px; margin:0; text-align:center; }
+    .row { display:flex; align-items:center; gap:28px; background:#120008; border:1px solid #3a0800; border-radius:12px; padding:20px 28px; }
+    .info { display:flex; flex-direction:column; gap:8px; }
+    .info strong { font-size:15px; }
+    .info span { color:#7d8590; font-size:13px; }
+    button { background:#cc3300; color:#fff; border:none; border-radius:7px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; transition:background .15s; }
+    button:hover { background:#aa2200; }
+    .done { color:#ff8844; font-size:13px; display:none; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Ícones — Painel Sentinela</h1>
+  <p>Baixe os três tamanhos e substitua na pasta da extensão, depois recarregue em chrome://extensions</p>
+
+  <div class="row">
+    <canvas id="c128" width="128" height="128"></canvas>
+    <div class="info">
+      <strong>128 × 128 px</strong>
+      <span>icon128.png</span>
+      <button onclick="dl('c128','icon128.png','d128')">Baixar icon128.png</button>
+      <span class="done" id="d128">✓ Baixado</span>
+    </div>
+  </div>
+  <div class="row">
+    <canvas id="c48" width="48" height="48"></canvas>
+    <div class="info">
+      <strong>48 × 48 px</strong>
+      <span>icon48.png</span>
+      <button onclick="dl('c48','icon48.png','d48')">Baixar icon48.png</button>
+      <span class="done" id="d48">✓ Baixado</span>
+    </div>
+  </div>
+  <div class="row">
+    <canvas id="c16" width="16" height="16"></canvas>
+    <div class="info">
+      <strong>16 × 16 px</strong>
+      <span>icon16.png</span>
+      <button onclick="dl('c16','icon16.png','d16')">Baixar icon16.png</button>
+      <span class="done" id="d16">✓ Baixado</span>
+    </div>
+  </div>
+
+<script>
+/* ── Eye of Sauron icon ───────────────────────────────────────── */
+function drawIcon(canvas) {
+  const s   = canvas.width;
+  const ctx = canvas.getContext('2d');
+  const cx  = s / 2;
+
+  /* Constants */
+  const eyeCY = s * 0.438;          // eye center Y
+  const eRx   = s * 0.479;          // horizontal half-extent (to pointed corners)
+  const eCP   = s * 0.25;           // bezier control-point height offset
+  const radius = s * 0.188;         // bg rounded corner radius
+
+  /* ── Background ── */
+  ctx.beginPath();
+  ctx.roundRect(0, 0, s, s, radius);
+  ctx.fillStyle = '#070007';
+  ctx.fill();
+
+  /* ── Fire atmosphere glow ── */
+  const atm = ctx.createRadialGradient(cx, eyeCY, 0, cx, eyeCY, s * 0.62);
+  atm.addColorStop(0,    'rgba(210, 65, 0, 0.72)');
+  atm.addColorStop(0.38, 'rgba(120, 18, 0, 0.45)');
+  atm.addColorStop(0.7,  'rgba(50,  5,  0, 0.2)');
+  atm.addColorStop(1,    'rgba(0,   0,  0, 0)');
+  ctx.beginPath();
+  ctx.roundRect(0, 0, s, s, radius);
+  ctx.fillStyle = atm;
+  ctx.fill();
+
+  /* ── Build the pointed eye shape (like LotR cat/dragon eye) ── */
+  const eyePath = () => {
+    ctx.beginPath();
+    ctx.moveTo(cx - eRx, eyeCY);                                                // left corner
+    ctx.bezierCurveTo(cx - eRx*0.67, eyeCY - eCP, cx - eRx*0.17, eyeCY - eCP, // top-left arc
+                      cx,             eyeCY - eCP*0.88);                        // top center
+    ctx.bezierCurveTo(cx + eRx*0.17, eyeCY - eCP, cx + eRx*0.67, eyeCY - eCP, // top-right arc
+                      cx + eRx,       eyeCY);                                   // right corner
+    ctx.bezierCurveTo(cx + eRx*0.67, eyeCY + eCP, cx + eRx*0.17, eyeCY + eCP, // bottom-right arc
+                      cx,             eyeCY + eCP*0.88);                        // bottom center
+    ctx.bezierCurveTo(cx - eRx*0.17, eyeCY + eCP, cx - eRx*0.67, eyeCY + eCP, // bottom-left arc
+                      cx - eRx,       eyeCY);                                   // back to left corner
+    ctx.closePath();
+  };
+
+  /* ── Outer halo (fiery corona around the eye) ── */
+  const halo = ctx.createRadialGradient(cx, eyeCY, eRx * 0.75, cx, eyeCY, eRx * 1.55);
+  halo.addColorStop(0,   'rgba(255, 90, 0, 0.22)');
+  halo.addColorStop(0.6, 'rgba(180, 25, 0, 0.1)');
+  halo.addColorStop(1,   'rgba(0,   0,  0, 0)');
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(cx, eyeCY, eRx * 1.55, eCP * 2.0, 0, 0, Math.PI * 2);
+  ctx.fillStyle = halo;
+  ctx.fill();
+  ctx.restore();
+
+  /* ── Eye iris (fire radial gradient, clipped to pointed shape) ── */
+  ctx.save();
+  eyePath();
+  ctx.clip();
+
+  const iris = ctx.createRadialGradient(cx, eyeCY, 0, cx, eyeCY, eRx * 0.95);
+  iris.addColorStop(0,    '#fffbb0');
+  iris.addColorStop(0.07, '#ffe000');
+  iris.addColorStop(0.2,  '#ff9200');
+  iris.addColorStop(0.38, '#e03200');
+  iris.addColorStop(0.58, '#860e00');
+  iris.addColorStop(0.8,  '#300200');
+  iris.addColorStop(1,    '#100000');
+  ctx.beginPath();
+  ctx.rect(0, 0, s, s);
+  ctx.fillStyle = iris;
+  ctx.fill();
+
+  /* ── Vertical slit pupil ── */
+  const pRx = eRx * 0.085;
+  const pRy = eCP * 0.9;
+  ctx.beginPath();
+  ctx.ellipse(cx, eyeCY, pRx, pRy, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#000';
+  ctx.fill();
+
+  /* Subtle glow on pupil edges */
+  const pGlow = ctx.createRadialGradient(cx, eyeCY, pRx, cx, eyeCY, pRx * 3);
+  pGlow.addColorStop(0,   'rgba(255,120,0,0.0)');
+  pGlow.addColorStop(0.4, 'rgba(255, 80,0,0.2)');
+  pGlow.addColorStop(1,   'rgba(0,   0, 0,0.0)');
+  ctx.beginPath();
+  ctx.ellipse(cx, eyeCY, pRx * 3, pRy * 1.05, 0, 0, Math.PI * 2);
+  ctx.fillStyle = pGlow;
+  ctx.fill();
+
+  ctx.restore(); // remove clip
+
+  /* ── Eye outline (fiery rim) ── */
+  eyePath();
+  ctx.strokeStyle = '#ff5800';
+  ctx.lineWidth   = s * 0.013;
+  ctx.globalAlpha = 0.6;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  /* ── Tower silhouettes (Barad-dûr) ── */
+  const tColor  = '#1c0200';
+  const bColor  = '#260300';
+  const tTop    = s * 0.725;
+  const tW      = s * 0.155;
+  const bH      = s * 0.088;
+  const bW      = s * 0.048;
+  const bGap    = s * 0.02;
+
+  // Left tower
+  ctx.fillStyle = tColor;
+  ctx.fillRect(s * 0.09, tTop, tW, s - tTop);
+  ctx.fillStyle = bColor;
+  const lx = s * 0.082;
+  [[0, 0], [bW + bGap, 0], [tW - bW, 0]].forEach(([dx]) =>
+    ctx.fillRect(lx + dx, tTop - bH, bW, bH));
+
+  // Right tower
+  const rtx = s * 0.755;
+  ctx.fillStyle = tColor;
+  ctx.fillRect(rtx, tTop, tW, s - tTop);
+  ctx.fillStyle = bColor;
+  [[0, 0], [bW + bGap, 0], [tW - bW, 0]].forEach(([dx]) =>
+    ctx.fillRect(rtx + dx, tTop - bH, bW, bH));
+
+  // Central spire
+  const spW = s * 0.075;
+  ctx.fillStyle = tColor;
+  ctx.fillRect(cx - spW / 2, s * 0.695, spW, s - s * 0.695);
+  ctx.fillStyle = bColor;
+  ctx.beginPath();
+  ctx.moveTo(cx, s * 0.655);
+  ctx.lineTo(cx - spW * 0.92, s * 0.695);
+  ctx.lineTo(cx + spW * 0.92, s * 0.695);
+  ctx.fill();
+
+  // Gate arch
+  ctx.beginPath();
+  ctx.arc(cx, s * 0.76, s * 0.255, Math.PI, 0);
+  ctx.strokeStyle = '#380600';
+  ctx.lineWidth   = s * 0.022;
+  ctx.globalAlpha = 0.85;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+function dl(canvasId, filename, doneId) {
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = document.getElementById(canvasId).toDataURL('image/png');
+  a.click();
+  document.getElementById(doneId).style.display = 'inline';
+}
+
+['c128', 'c48', 'c16'].forEach(id => drawIcon(document.getElementById(id)));
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Painel Sentinela",
+  "version": "1.1",
+  "description": "Painel administrativo — consulta e dashboard do Pegador de Pedidos",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://dqiosohjicnruwrhxeou.supabase.co/*",
+    "*://*.mercadolivre.com.br/*",
+    "*://*.mercadolibre.com/*"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_title": "Painel Sentinela"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.mercadolivre.com.br/*",
+        "*://*.mercadolibre.com/*"
+      ],
+      "css": ["content_painel.css"],
+      "js":  ["content_painel.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["panel.html", "panel.css", "panel.js", "icon48.png", "icon128.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
